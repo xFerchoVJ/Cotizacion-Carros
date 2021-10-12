@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
-import { obtenerDiferenciaYear } from '../helper';
+import {
+  obtenerDiferenciaYear,
+  calcularMarca,
+  calcularAumento,
+} from "../helper";
+import PropTypes from 'prop-types';
+
 const Campo = styled.div`
   display: flex;
   margin-bottom: 1rem;
@@ -49,7 +55,7 @@ const Error = styled.div`
   text-align: center;
   margin-bottom: 2rem;
 `;
-const Formulario = () => {
+const Formulario = ({setResumen, setCargando}) => {
   const [datos, setDatos] = useState({
     marca: "",
     year: "",
@@ -77,21 +83,23 @@ const Formulario = () => {
     }
     setError(false);
 
-    //Obtener la diferencia de años
     const diferencia = obtenerDiferenciaYear(year);
 
-    //Una base de 2000
     let resultado = 2000;
-    //Por cada añoo se resta el 3% del valor
-    resultado -= ((diferencia * 3) * resultado) / 100;
-    // Americano 15%
-    // Asiatico 5%
-    // Europeo 30%
-
-    //Basico aumenta 20%
-    //Completo 50%
-
-    //Total
+    resultado -= (diferencia * 3 * resultado) / 100;
+    resultado = calcularMarca(marca) * resultado;
+    const incrementoPlan = calcularAumento(plan);
+    resultado = parseFloat(incrementoPlan * resultado).toFixed(2);
+    
+    setCargando(true);
+    setTimeout(() => {
+      setResumen({
+        cotizacion: resultado,
+        datos
+      })  
+      setCargando(false);
+    }, 3000);
+    
   };
   return (
     <form onSubmit={cotizarSeguro}>
@@ -145,4 +153,9 @@ const Formulario = () => {
   );
 };
 
+
+Formulario.propTypes = {
+  setResumen: PropTypes.func.isRequired,
+  setCargando: PropTypes.func.isRequired
+}
 export default Formulario;
